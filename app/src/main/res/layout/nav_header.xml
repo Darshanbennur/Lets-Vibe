@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:background="#00cccc">
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/icons_main"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="100dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="75dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/andika"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:text="Let's Vibe"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="130dp"
+        android:fontFamily="@font/andika"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        android:text="-Darshan Bennur"/>
+
+</LinearLayout>
