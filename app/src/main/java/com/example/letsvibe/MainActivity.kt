@@ -1,35 +1,37 @@
 package com.example.letsvibe
 
+
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.SearchView
-import kotlin.collections.List
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.letsvibe.databinding.ActivityMainBinding
-
-
-import com.google.firebase.database.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
-import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 
     private lateinit var binding : ActivityMainBinding
     lateinit var toggle : ActionBarDrawerToggle
     lateinit var songArrayList : ArrayList<Songs>
+    private lateinit var preferences : SharedPreferences
+    private lateinit var firebaseAuth : FirebaseAuth
+
+
+    private lateinit var alert : AlertDialog.Builder
 
 //    lateinit var filteredList : ArrayList<Songs>
 
@@ -38,6 +40,11 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
         binding = ActivityMainBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
 
+        preferences = getSharedPreferences("user", MODE_PRIVATE)
+        var editor: SharedPreferences.Editor = preferences.edit()
+
+        preferences.edit().putString("firstTime","yes").apply()
+        Toast.makeText(applicationContext,preferences.getString("firstTime","default"),Toast.LENGTH_SHORT).show()
 //        binding.navSearchBar.clearFocus()
 //        binding.navSearchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
 //            override fun onQueryTextSubmit(query: String?): Boolean {
@@ -51,6 +58,9 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 //
 //        })
 
+        alert = AlertDialog.Builder(this)
+
+        firebaseAuth = FirebaseAuth.getInstance()
 
         binding.recView.layoutManager = LinearLayoutManager(this)
         binding.recView.setHasFixedSize(true)
@@ -74,6 +84,22 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
                 }
                 R.id.menuItem3 -> Toast.makeText(applicationContext,"Developer is Noob",Toast.LENGTH_SHORT).show()
                 R.id.menuItem4 -> Toast.makeText(applicationContext,"It's Private Ok....",Toast.LENGTH_SHORT).show()
+                R.id.menuItem5 -> {
+                    alert.setTitle("Are you Sure?")
+                        .setMessage("Are you Sure You want to Logout")
+                        .setCancelable(true)
+                        .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
+                            editor.clear()
+                            editor.apply()
+                            val intent = Intent(applicationContext, LoginPage::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                        .setNegativeButton("No"){ dialogInterface: DialogInterface, _: Int ->
+                            dialogInterface.cancel()
+                        }
+                        .show()
+                }
             }
             true
         }
@@ -88,7 +114,7 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 
         databaseRef.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                var favour : String = "some shit"
+//                var favour : String = "some shit"
                 var dataSongName : String = ""
                 var dataImageURL : String = ""
                 var dataMediaID : String = ""
@@ -104,7 +130,7 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
                         if(Objects.equals(snapshot_02.key,"mediaID"))
                             dataMediaID = snapshot_02.value.toString()
                     }
-                    val songObj = Songs(favour, dataSongName, dataImageURL, dataMediaID, dataSingerName, dataSongURL)
+                    val songObj = Songs(dataSongName, dataImageURL, dataMediaID, dataSingerName, dataSongURL)
                     songArrayList.add(songObj)
                 }
                 binding.recView.adapter = RecAdapter(songArrayList,this@MainActivity)
@@ -117,9 +143,14 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
         })
     }
 
-    fun opendrawer(view: View?) {
-        binding.drawerLayout.openDrawer(GravityCompat.START)
-    }
+//    override fun onStart() {
+//        super.onStart()
+//        var user : FirebaseUser? = firebaseAuth.currentUser
+//        if (user == null){
+//            val intent = Intent(this, LoginPage::class.java)
+//            startActivity(intent)
+//        }
+//    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (toggle.onOptionsItemSelected(item)){

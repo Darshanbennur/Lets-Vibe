@@ -2,6 +2,7 @@ package com.example.letsvibe
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.icu.number.IntegerWidth
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,7 @@ class nowPlaying : AppCompatActivity() {
     var singerName : String = ""
     var songName : String = ""
 
+    private lateinit var sharedPreferences : SharedPreferences
 
     //for taking them into Favourites
     var favourites : Boolean = false
@@ -47,6 +49,7 @@ class nowPlaying : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityNowPlayingBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
+        sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
 
         var intent : Intent = this.intent
         mediaID = intent.getIntExtra("mediaID",0)
@@ -127,17 +130,24 @@ class nowPlaying : AppCompatActivity() {
     }
 
     fun setFavourites(fav : String){
-        var changeFav : DatabaseReference = Firebase.database.getReference("Songs")
-        val user = mapOf<String,String>(
-            "Favourites" to fav
+        var updateFav : DatabaseReference = Firebase.database.getReference("Users")
+        var favNum : Int = 0
+        if(fav.equals("true")){
+            favNum = mediaID
+        }else{
+            favNum = -1
+        }
+        val favourUpdate = mapOf<String,Int>(
+            mediaID.toString() to favNum
         )
-        changeFav.child(mediaID.toString()).updateChildren(user).addOnSuccessListener {
-            Toast.makeText(applicationContext,"Added to Favourites",Toast.LENGTH_SHORT).show()
+        updateFav.child(
+            sharedPreferences.getString("number","user1").toString()
+        ).child("Favourites").updateChildren(favourUpdate).addOnSuccessListener {
+            Toast.makeText(applicationContext,"Added to Favourites DataBase",Toast.LENGTH_SHORT).show()
         }.addOnFailureListener {
-            Toast.makeText(applicationContext,"Oppsies Try Adding Again",Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext,"Not added to Database",Toast.LENGTH_SHORT).show()
         }
     }
-
 
     private fun createTimeLabel(time: Int): String {
         var timeLabel = ""
@@ -224,15 +234,6 @@ class nowPlaying : AppCompatActivity() {
                         songName = data.value.toString()
                         binding.songName.text = songName
                     }
-                    if(Objects.equals(data.key,"Favourites")){
-                        if (data.value.toString().equals("false")){
-                            binding.favSong.setBackgroundResource(R.drawable.ic_baseline_favorite_border_24)
-                            favourites = false
-                        }else{
-                            binding.favSong.setBackgroundResource(R.drawable.ic_baseline_favorite_24)
-                            favourites = true
-                        }
-                    }
                 }
             }
 
@@ -240,6 +241,25 @@ class nowPlaying : AppCompatActivity() {
 
             }
 
+        })
+
+        var favUpdate : DatabaseReference = Firebase.database.getReference("Users").child(
+            sharedPreferences.getString("number","user1").toString()
+        ).child("Favourites")
+        favUpdate.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                binding.favSong.setBackgroundResource(R.drawable.ic_baseline_favorite_border_24)
+                favourites = false
+                for (data in snapshot.children){
+                    if (Objects.equals(data.key,mediaID.toString())){
+                        binding.favSong.setBackgroundResource(R.drawable.ic_baseline_favorite_24)
+                        favourites = true
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+
+            }
         })
     }
 

@@ -25,14 +25,6 @@
                 android:layout_width="10dp"
                 android:layout_height="wrap_content" />
 
-            <ImageView
-                android:id="@+id/hamburger"
-                android:layout_width="30dp"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:onClick="opendrawer"
-                android:src="@drawable/ic_baseline_menu_24" />
-
             <Space
                 android:layout_width="20dp"
                 android:layout_height="wrap_content" />
@@ -42,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="9dp"
                 android:fontFamily="@font/andika"
-                android:text="Let's Vibe"
+                android:text="Home"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 

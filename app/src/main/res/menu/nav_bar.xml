@@ -32,4 +32,15 @@
         </item>
     </group>
 
+    <group android:checkableBehavior="single">
+        <item android:title="Forget">
+            <menu>
+                <item
+                    android:id="@+id/menuItem5"
+                    android:icon="@drawable/ic_baseline_exit_to_app_24"
+                    android:title="Logout"/>
+            </menu>
+        </item>
+    </group>
+
 </menu>

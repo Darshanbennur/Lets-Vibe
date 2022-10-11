@@ -1,6 +1,8 @@
 package com.example.letsvibe
 
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.letsvibe.databinding.ActivityFavouriteSectionBinding
@@ -19,19 +22,27 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.ArrayList
 
 class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
 
     private lateinit var binding : ActivityFavouriteSectionBinding
     lateinit var toggle : ActionBarDrawerToggle
+
+    lateinit var songArrayMediaIDList : ArrayList<Int>
     lateinit var songArrayList : ArrayList<Songs>
 
-    var sendingSong : Int = 0
+    private lateinit var sharedPreferences : SharedPreferences
+
+    private lateinit var alert : AlertDialog.Builder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFavouriteSectionBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
+
+        sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
+        var editor: SharedPreferences.Editor = sharedPreferences.edit()
 
         binding.recViewfav.layoutManager = LinearLayoutManager(this)
         binding.recViewfav.setHasFixedSize(true)
@@ -39,6 +50,8 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
         toggle = ActionBarDrawerToggle(this,binding.drawerLayoutfav,R.string.open,R.string.close)
         binding.drawerLayoutfav.addDrawerListener(toggle)
         toggle.syncState()
+
+        alert = AlertDialog.Builder(this)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.navView.setNavigationItemSelectedListener {
@@ -55,16 +68,30 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
                 }
                 R.id.menuItem3 -> Toast.makeText(applicationContext,"Developer is Noob", Toast.LENGTH_SHORT).show()
                 R.id.menuItem4 -> Toast.makeText(applicationContext,"It's Private Ok...", Toast.LENGTH_SHORT).show()
+                R.id.menuItem5 ->{
+                    alert.setTitle("Are you Sure?")
+                        .setMessage("Are you Sure You want to Logout")
+                        .setCancelable(true)
+                        .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
+                            editor.clear()
+                            editor.apply()
+                            val intent = Intent(applicationContext, LoginPage::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                        .setNegativeButton("No"){ dialogInterface: DialogInterface, _: Int ->
+                            dialogInterface.cancel()
+                        }
+                        .show()
+                }
             }
             true
         }
 
+        songArrayMediaIDList = ArrayList()
         songArrayList = ArrayList()
+        getFavouriteMediaID()
         retrieveSongs()
-    }
-
-    fun opendrawer(view: View?) {
-        binding.drawerLayoutfav.openDrawer(GravityCompat.START)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -74,33 +101,52 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
         return super.onOptionsItemSelected(item)
     }
 
+    private fun getFavouriteMediaID(){
+        val getFavID : DatabaseReference = Firebase.database.getReference("Users").child(
+            sharedPreferences.getString("number","user1").toString()
+        ).child("Favourites")
+        getFavID.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (dataID in snapshot.children){
+                    var value : Int = Integer.parseInt(dataID.value.toString())
+                    if (value != -1){
+                        songArrayMediaIDList.add(value)
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
+    }
+
     private fun retrieveSongs() {
         val databaseRef : DatabaseReference = Firebase.database.getReference("Songs")
 
         databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                var favour : String = ""
                 var dataSongName : String = ""
                 var dataImageURL : String = ""
                 var dataMediaID : String = ""
                 var dataSingerName : String = "some shit"
                 var dataSongURL : String = "some shit"
 
+                var id : Int = 0
+
                 for (snapshot_01 : DataSnapshot in snapshot.children){
                     for (snapshot_02 : DataSnapshot in snapshot_01.children){
-                        if(Objects.equals(snapshot_02.key,"Favourites"))
-                            favour = snapshot_02.value.toString()
+                        if(Objects.equals(snapshot_02.key,"mediaID")) {
+                            dataMediaID = snapshot_02.value.toString()
+                            id = Integer.parseInt(dataMediaID)
+                        }
                         if(Objects.equals(snapshot_02.key,"Name"))
                             dataSongName = snapshot_02.value.toString()
                         if(Objects.equals(snapshot_02.key,"imageURL"))
                             dataImageURL = snapshot_02.value.toString()
-                        if(Objects.equals(snapshot_02.key,"mediaID")) {
-                            dataMediaID = snapshot_02.value.toString()
-                            sendingSong = Integer.parseInt(snapshot_02.value.toString())
-                        }
                     }
-                    if (favour.equals("true")){
-                        val songObj = Songs(favour, dataSongName, dataImageURL, dataMediaID, dataSingerName, dataSongURL)
+                    if (songArrayMediaIDList.contains(id)){
+                        val songObj = Songs(dataSongName, dataImageURL, dataMediaID, dataSingerName, dataSongURL)
                         songArrayList.add(songObj)
                     }
                 }
