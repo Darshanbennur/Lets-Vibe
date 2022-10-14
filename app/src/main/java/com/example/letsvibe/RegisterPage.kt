@@ -57,7 +57,6 @@ class RegisterPage : AppCompatActivity() {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.hasChild(userPhoneNumber)){
                             Toast.makeText(applicationContext,"User with Same ID already Registered",Toast.LENGTH_SHORT).show()
-                            binding.userPassword.requestFocus()
                         }else{
                             val storer = mapOf<String,String>(
                                 "Name" to userName,

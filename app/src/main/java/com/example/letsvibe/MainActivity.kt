@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.Toast
@@ -25,11 +26,10 @@ import java.util.*
 class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 
     private lateinit var binding : ActivityMainBinding
-    lateinit var toggle : ActionBarDrawerToggle
+    private lateinit var toggle : ActionBarDrawerToggle
     lateinit var songArrayList : ArrayList<Songs>
     private lateinit var preferences : SharedPreferences
     private lateinit var firebaseAuth : FirebaseAuth
-
 
     private lateinit var alert : AlertDialog.Builder
 
@@ -40,11 +40,9 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
         binding = ActivityMainBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
 
-        preferences = getSharedPreferences("user", MODE_PRIVATE)
+        preferences = getSharedPreferences("userData", MODE_PRIVATE)
         var editor: SharedPreferences.Editor = preferences.edit()
 
-        preferences.edit().putString("firstTime","yes").apply()
-        Toast.makeText(applicationContext,preferences.getString("firstTime","default"),Toast.LENGTH_SHORT).show()
 //        binding.navSearchBar.clearFocus()
 //        binding.navSearchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
 //            override fun onQueryTextSubmit(query: String?): Boolean {
@@ -103,11 +101,33 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
             }
             true
         }
-
+        fetchUserDetails()
         //Initializing of the array List
         songArrayList = ArrayList()
         retrieveSongs()
+
     }
+
+    private fun fetchUserDetails(){
+        val refer : DatabaseReference = Firebase.database.getReference("Users").child(
+            preferences.getString("number","user1").toString()
+        )
+        refer.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (data in snapshot.children){
+                    if (Objects.equals(data.key,"Name")){
+                        binding.displayName.text = "Hello, " + data.value.toString()
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
+    }
+
 
     private fun retrieveSongs() {
         val databaseRef : DatabaseReference = Firebase.database.getReference("Songs")

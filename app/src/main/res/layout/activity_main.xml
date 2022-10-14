@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content" />
 
             <Space
-                android:layout_width="20dp"
+                android:layout_width="10dp"
                 android:layout_height="wrap_content" />
 
             <TextView
@@ -37,6 +37,20 @@
                 android:text="Home"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
+
+            <Space
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/displayName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UserName"
+                android:fontFamily="@font/andika"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:layout_marginTop="7dp"/>
 
         </LinearLayout>
 

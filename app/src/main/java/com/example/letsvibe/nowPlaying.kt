@@ -49,6 +49,8 @@ class nowPlaying : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityNowPlayingBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
+        supportActionBar?.hide()
+
         sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
 
         var intent : Intent = this.intent
@@ -213,7 +215,7 @@ class nowPlaying : AppCompatActivity() {
         }
     }
 
-    fun fetchMusicDetails(media : Int){
+    private fun fetchMusicDetails(media : Int){
         var fetchData : DatabaseReference = Firebase.database.getReference("Songs").child(media.toString())
         fetchData.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -251,7 +253,7 @@ class nowPlaying : AppCompatActivity() {
                 binding.favSong.setBackgroundResource(R.drawable.ic_baseline_favorite_border_24)
                 favourites = false
                 for (data in snapshot.children){
-                    if (Objects.equals(data.key,mediaID.toString())){
+                    if (Objects.equals(data.value.toString(),mediaID.toString())){
                         binding.favSong.setBackgroundResource(R.drawable.ic_baseline_favorite_24)
                         favourites = true
                     }

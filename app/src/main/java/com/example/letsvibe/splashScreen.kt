@@ -16,12 +16,12 @@ class splashScreen : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
-        preferences = getSharedPreferences("user", MODE_PRIVATE)
+        preferences = getSharedPreferences("userData", MODE_PRIVATE)
         handler = Handler()
 
         handler.postDelayed({
 
-            if (preferences.getString("firstTime", "no").toString() == "no") {
+            if (preferences.getString("number", "no").toString() == "no") {
                 Toast.makeText(applicationContext,preferences.getString("number", "no").toString(),Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, LoginPage::class.java)
                 startActivity(intent)
