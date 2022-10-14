@@ -7,7 +7,10 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
+import android.widget.Adapter
+import androidx.appcompat.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -22,12 +25,15 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
+class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener, SearchView.OnQueryTextListener{
 
     private lateinit var binding : ActivityMainBinding
     private lateinit var toggle : ActionBarDrawerToggle
     lateinit var songArrayList : ArrayList<Songs>
+    lateinit var filteredList : ArrayList<Songs>
+
     private lateinit var preferences : SharedPreferences
     private lateinit var firebaseAuth : FirebaseAuth
 
@@ -42,19 +48,6 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 
         preferences = getSharedPreferences("userData", MODE_PRIVATE)
         var editor: SharedPreferences.Editor = preferences.edit()
-
-//        binding.navSearchBar.clearFocus()
-//        binding.navSearchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-//            override fun onQueryTextSubmit(query: String?): Boolean {
-//                return true
-//            }
-//
-//            override fun onQueryTextChange(newText: String?): Boolean {
-//                filterList(newText)
-//                return true
-//            }
-//
-//        })
 
         alert = AlertDialog.Builder(this)
 
@@ -103,9 +96,19 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
         }
         fetchUserDetails()
         //Initializing of the array List
+        filteredList = ArrayList()
         songArrayList = ArrayList()
         retrieveSongs()
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search_view,menu)
+        val  search = menu?.findItem(R.id.searchView)
+        val searchView = search?.actionView as? SearchView
+        searchView?.isSubmitButtonEnabled = false
+        searchView?.setOnQueryTextListener(this)
+        return true
     }
 
     private fun fetchUserDetails(){
@@ -127,7 +130,6 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 
         })
     }
-
 
     private fun retrieveSongs() {
         val databaseRef : DatabaseReference = Firebase.database.getReference("Songs")
@@ -181,9 +183,47 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener {
 
     override fun onItemClick(position: Int) {
         var intent = Intent(this,nowPlaying::class.java)
-        var num = Integer.parseInt(songArrayList[position].mediaID)
+        var num = 0
+        if (filteredList.isEmpty()){
+            num = Integer.parseInt(songArrayList[position].mediaID)
+        }else{
+            num = Integer.parseInt(filteredList[position].mediaID)
+        }
+
         intent.putExtra("mediaID",num)
         startActivity(intent)
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if(query != null){
+            filterList(query)
+        }
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        if (newText != null){
+            filterList(newText)
+        }
+        return true
+    }
+
+    private fun filterList(newText: String?) {
+        filteredList.clear()
+        for (item : Songs in songArrayList){
+            if (newText != null) {
+                if (item.Name.toLowerCase().contains(newText.toLowerCase())){
+                    filteredList.add(item)
+                }
+            }
+        }
+
+        if (filteredList.isEmpty()){
+            Toast.makeText(applicationContext,"No Such Songs",Toast.LENGTH_SHORT).show()
+        }else{
+            binding.recView.adapter = RecAdapter(filteredList,this@MainActivity)
+        }
+
     }
 
 }

@@ -7,11 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.letsvibe.databinding.ActivityFavouriteSectionBinding
@@ -24,13 +26,14 @@ import com.google.firebase.ktx.Firebase
 import java.util.*
 import kotlin.collections.ArrayList
 
-class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
+class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener, SearchView.OnQueryTextListener  {
 
     private lateinit var binding : ActivityFavouriteSectionBinding
     lateinit var toggle : ActionBarDrawerToggle
 
     lateinit var songArrayMediaIDList : ArrayList<Int>
     lateinit var songArrayList : ArrayList<Songs>
+    private lateinit var filteredList : ArrayList<Songs>
 
     private lateinit var sharedPreferences : SharedPreferences
 
@@ -90,6 +93,7 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
 
         songArrayMediaIDList = ArrayList()
         songArrayList = ArrayList()
+        filteredList = ArrayList()
         getFavouriteMediaID()
         retrieveSongs()
     }
@@ -162,9 +166,41 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
 
     override fun onItemClick(position: Int) {
         var intent = Intent(this,nowPlaying::class.java)
-        var num = Integer.parseInt(songArrayList[position].mediaID)
+        var num = 0
+        if (filteredList.isEmpty()){
+            num = Integer.parseInt(songArrayList[position].mediaID)
+        }else{
+            num = Integer.parseInt(filteredList[position].mediaID)
+        }
+
         intent.putExtra("mediaID",num)
         startActivity(intent)
+    }
+
+    private fun filterList(newText: String?) {
+        filteredList.clear()
+        for (item : Songs in songArrayList){
+            if (newText != null) {
+                if (item.Name.toLowerCase().contains(newText.toLowerCase())){
+                    filteredList.add(item)
+                }
+            }
+        }
+
+        if (filteredList.isEmpty()){
+            Toast.makeText(applicationContext,"No Such Songs",Toast.LENGTH_SHORT).show()
+        }else{
+            binding.recViewfav.adapter = RecAdapter(filteredList,this@favouriteSection)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search_view,menu)
+        val  search = menu?.findItem(R.id.searchView)
+        val searchView = search?.actionView as? SearchView
+        searchView?.isSubmitButtonEnabled = false
+        searchView?.setOnQueryTextListener(this)
+        return true
     }
 
     override fun onBackPressed() {
@@ -172,5 +208,19 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener  {
         var intent = Intent(this,MainActivity::class.java)
         startActivity(intent)
         super.onBackPressed()
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if(query != null){
+            filterList(query)
+        }
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        if(newText != null){
+            filterList(newText)
+        }
+        return true
     }
 }
