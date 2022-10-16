@@ -60,6 +60,7 @@ class RegisterPage : AppCompatActivity() {
                         }else{
                             val storer = mapOf<String,String>(
                                 "Name" to userName,
+                                "Email" to useremail
                             )
                             dataBaseRef.child(userPhoneNumber).updateChildren(storer).addOnSuccessListener {
                                 Toast.makeText(applicationContext,"Done RD",Toast.LENGTH_SHORT).show()

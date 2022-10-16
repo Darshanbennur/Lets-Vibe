@@ -22,7 +22,6 @@ class splashScreen : AppCompatActivity() {
         handler.postDelayed({
 
             if (preferences.getString("number", "no").toString() == "no") {
-                Toast.makeText(applicationContext,preferences.getString("number", "no").toString(),Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, LoginPage::class.java)
                 startActivity(intent)
                 finish()

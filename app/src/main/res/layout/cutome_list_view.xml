@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:padding="15dp"
     android:layout_marginEnd="30dp"
+    android:id="@+id/recID"
     android:layout_marginBottom="10dp"
     android:background="@drawable/strokers"
     android:orientation="horizontal">
@@ -17,13 +18,33 @@
     <Space
         android:layout_width="20dp"
         android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/custom_songName"
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:text="Name Here"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/custom_songName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/white"
+            android:fontFamily="@font/andika"
+            android:textSize="16sp"
+            android:text="Name Here"/>
+
+        <TextView
+            android:id="@+id/custom_singerName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SingerName"
+            android:textColor="@color/singername"
+            android:fontFamily="@font/andika"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
+
+
 
 </LinearLayout>

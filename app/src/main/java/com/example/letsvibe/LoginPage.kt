@@ -9,6 +9,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.letsvibe.databinding.ActivityLoginPageBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import java.util.*
 
 class LoginPage : AppCompatActivity() {
 
@@ -30,8 +37,8 @@ class LoginPage : AppCompatActivity() {
         }
 
         binding.loginButton.setOnClickListener {
-            var userEmail = binding.userEmail.text.toString()
             var userPhone = binding.userPhoneNumber.text.toString()
+            var userEmail = binding.userEmail.text.toString()
             var password = binding.userPassword.text.toString()
 
             if (!Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()){
@@ -47,23 +54,52 @@ class LoginPage : AppCompatActivity() {
                 binding.userPassword.requestFocus()
             }
             else{
-                firebaseAuth.signInWithEmailAndPassword(userEmail,password).addOnCompleteListener {
-                    if (it.isSuccessful){
-                        Toast.makeText(applicationContext,"Logged in Successfully",Toast.LENGTH_SHORT).show()
-                        sharedPreferences.edit().putString("number","" + userPhone).apply()
-                        var intent = Intent(this,MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
+                fetchUserphone (userPhone,userEmail)
+                var flag = true
+                var intent = Intent(this,MainActivity::class.java)
+                val timer = Timer()
+                timer.schedule(object : TimerTask() {
+                    override fun run() {
+                        if (binding.helper.text.equals(userEmail)){
+                            firebaseAuth.signInWithEmailAndPassword(userEmail,password).addOnCompleteListener {
+                                if (it.isSuccessful){
+                                    Toast.makeText(applicationContext,"Logged in Successfully",Toast.LENGTH_SHORT).show()
+                                    sharedPreferences.edit().putString("number","" + userPhone).apply()
+                                    flag = false
+                                    startActivity(intent)
+                                    finish()
+                                }
+                                else{
+                                    Toast.makeText(applicationContext,"Login Error",Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                        timer.cancel()
                     }
-                    else{
-                        Toast.makeText(applicationContext,"Login Error",Toast.LENGTH_SHORT).show()
+                }, 2000)
+            }
+        }
+    }
+
+    private fun fetchUserphone (userPhone : String, mail : String){
+        var ref : DatabaseReference = Firebase.database.getReference("Users").child(userPhone)
+        ref.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot){
+                for (data in snapshot.children){
+                    if(Objects.equals(data.key,"Email")) {
+                        binding.helper.text = data.value.toString()
+                        if (!binding.helper.text.toString().equals(mail)){
+                            Toast.makeText(applicationContext,"Email not Linked with this Number ",Toast.LENGTH_SHORT).show()
+                            binding.userPhoneNumber.requestFocus()
+                            binding.userPhoneNumber.error = "Check Phone Number"
+                        }
                     }
                 }
             }
-        }
+            override fun onCancelled(error: DatabaseError) {
 
+            }
+        })
     }
-
-
 
 }

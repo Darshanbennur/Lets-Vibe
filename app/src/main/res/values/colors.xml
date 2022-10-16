@@ -9,4 +9,5 @@
     <color name="mainBackground">#561B55</color>
     <color name="white">#FFFFFFFF</color>
     <color name="navBarColor">#00cccc</color>
+    <color name="singername">#a5ada8</color>
 </resources>

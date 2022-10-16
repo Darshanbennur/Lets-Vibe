@@ -133,7 +133,7 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener, Se
                 var dataSongName : String = ""
                 var dataImageURL : String = ""
                 var dataMediaID : String = ""
-                var dataSingerName : String = "some shit"
+                var dataSingerName : String = ""
                 var dataSongURL : String = "some shit"
 
                 var id : Int = 0
@@ -148,6 +148,8 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener, Se
                             dataSongName = snapshot_02.value.toString()
                         if(Objects.equals(snapshot_02.key,"imageURL"))
                             dataImageURL = snapshot_02.value.toString()
+                        if(Objects.equals(snapshot_02.key,"singerName"))
+                            dataSingerName = snapshot_02.value.toString()
                     }
                     if (songArrayMediaIDList.contains(id)){
                         val songObj = Songs(dataSongName, dataImageURL, dataMediaID, dataSingerName, dataSongURL)
@@ -188,6 +190,8 @@ class favouriteSection : AppCompatActivity(), RecAdapter.OnItemClickListener, Se
         }
 
         if (filteredList.isEmpty()){
+            filteredList.clear()
+            binding.recViewfav.adapter = RecAdapter(filteredList,this@favouriteSection)
             Toast.makeText(applicationContext,"No Such Songs",Toast.LENGTH_SHORT).show()
         }else{
             binding.recViewfav.adapter = RecAdapter(filteredList,this@favouriteSection)

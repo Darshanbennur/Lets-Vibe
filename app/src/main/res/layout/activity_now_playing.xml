@@ -132,7 +132,8 @@
             <SeekBar
                 android:id="@+id/songProgress"
                 android:layout_width="250dp"
-                android:layout_height="40dp"/>
+                android:layout_height="40dp"
+                android:progressTint="@color/black"/>
 
             <TextView
                 android:id="@+id/time_remaining"
@@ -191,7 +192,8 @@
                 <SeekBar
                     android:id="@+id/volumeSeekbar"
                     android:layout_width="150dp"
-                    android:layout_height="30dp"/>
+                    android:layout_height="30dp"
+                    android:progressTint="@color/black"/>
 
                 <ImageButton
                     android:layout_width="30dp"

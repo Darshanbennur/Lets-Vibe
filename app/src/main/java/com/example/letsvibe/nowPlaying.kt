@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.math.roundToInt
 
 class nowPlaying : AppCompatActivity() {
     private lateinit var binding : ActivityNowPlayingBinding
@@ -55,7 +56,6 @@ class nowPlaying : AppCompatActivity() {
 
         var intent : Intent = this.intent
         mediaID = intent.getIntExtra("mediaID",0)
-        Toast.makeText(applicationContext,mediaID.toString(), Toast.LENGTH_SHORT).show()
 
         fetchMusicDetails(mediaID)
 
@@ -89,6 +89,7 @@ class nowPlaying : AppCompatActivity() {
             override fun onStopTrackingTouch(p0: SeekBar?) {
             }
         })
+
 
         Thread(Runnable {
             while (mediaPlayer != null){
@@ -182,7 +183,7 @@ class nowPlaying : AppCompatActivity() {
 
     fun forwardSong(view : View){
         mediaPlayer.stop()
-        mediaID %= 5
+        mediaID %= 9
         mediaID++
         fetchMusicDetails(mediaID)
         mediaPlayer = MediaPlayer()
@@ -196,7 +197,7 @@ class nowPlaying : AppCompatActivity() {
         mediaPlayer.stop()
         mediaID--
         if (mediaID == 0){
-            mediaID = 5
+            mediaID = 9
         }
         fetchMusicDetails(mediaID)
         mediaPlayer = MediaPlayer()

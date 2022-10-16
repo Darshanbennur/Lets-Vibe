@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener, Search
                 var dataSongName : String = ""
                 var dataImageURL : String = ""
                 var dataMediaID : String = ""
-                var dataSingerName : String = "some shit"
+                var dataSingerName : String = ""
                 var dataSongURL : String = "some shit"
 
                 for (snapshot_01 : DataSnapshot in snapshot.children){
@@ -151,6 +151,8 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener, Search
                             dataImageURL = snapshot_02.value.toString()
                         if(Objects.equals(snapshot_02.key,"mediaID"))
                             dataMediaID = snapshot_02.value.toString()
+                        if(Objects.equals(snapshot_02.key,"singerName"))
+                            dataSingerName = "- " +  snapshot_02.value.toString()
                     }
                     val songObj = Songs(dataSongName, dataImageURL, dataMediaID, dataSingerName, dataSongURL)
                     songArrayList.add(songObj)
@@ -164,15 +166,6 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener, Search
 
         })
     }
-
-//    override fun onStart() {
-//        super.onStart()
-//        var user : FirebaseUser? = firebaseAuth.currentUser
-//        if (user == null){
-//            val intent = Intent(this, LoginPage::class.java)
-//            startActivity(intent)
-//        }
-//    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (toggle.onOptionsItemSelected(item)){
@@ -189,7 +182,6 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener, Search
         }else{
             num = Integer.parseInt(filteredList[position].mediaID)
         }
-
         intent.putExtra("mediaID",num)
         startActivity(intent)
     }
@@ -219,6 +211,8 @@ class MainActivity : AppCompatActivity(), RecAdapter.OnItemClickListener, Search
         }
 
         if (filteredList.isEmpty()){
+            filteredList.clear()
+            binding.recView.adapter = RecAdapter(filteredList,this@MainActivity)
             Toast.makeText(applicationContext,"No Such Songs",Toast.LENGTH_SHORT).show()
         }else{
             binding.recView.adapter = RecAdapter(filteredList,this@MainActivity)
